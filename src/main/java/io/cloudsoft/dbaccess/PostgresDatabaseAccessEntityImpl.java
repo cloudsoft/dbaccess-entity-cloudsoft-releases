@@ -1,11 +1,14 @@
 package io.cloudsoft.dbaccess;
 
-import io.cloudsoft.dbaccess.client.DBAccessClient;
+import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 import io.cloudsoft.dbaccess.client.PostgresAccessClient;
 
-public class PostgresDatabaseAccessEntityImpl extends DatabaseAccessEntityImpl implements PostresDatabaseAccessEntity {
+public class PostgresDatabaseAccessEntityImpl extends DatabaseAccessEntityImpl implements PostgresDatabaseAccessEntity {
+
     @Override
-    public DBAccessClient createClient() {
-        return new PostgresAccessClient();
+    public DatabaseAccessClient createClient() {
+        return new PostgresAccessClient(config().get(ENDPOINT_URL), config().get(ADMIN_USER), config().get(ADMIN_PASSWORD),
+            config().get(DATABASE));
     }
+
 }
