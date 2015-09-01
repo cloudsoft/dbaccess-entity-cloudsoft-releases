@@ -1,12 +1,11 @@
 package io.cloudsoft.dbaccess;
 
+import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 import org.apache.brooklyn.config.ConfigKey;
 import org.apache.brooklyn.core.config.ConfigKeys;
 import org.apache.brooklyn.core.sensor.BasicAttributeSensorAndConfigKey;
 import org.apache.brooklyn.entity.database.DatastoreMixins;
 import org.apache.brooklyn.entity.stock.BasicEntity;
-
-import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 
 public interface DatabaseAccessEntity extends BasicEntity, DatastoreMixins.HasDatastoreUrl {
 

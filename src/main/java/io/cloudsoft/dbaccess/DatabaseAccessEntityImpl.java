@@ -1,13 +1,11 @@
 package io.cloudsoft.dbaccess;
 
+import com.google.api.client.repackaged.com.google.common.base.Preconditions;
+import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 import org.apache.brooklyn.entity.stock.BasicEntityImpl;
 import org.apache.brooklyn.util.text.Identifiers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
-
-import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 
 public abstract class DatabaseAccessEntityImpl extends BasicEntityImpl implements DatabaseAccessEntity {
 
@@ -25,7 +23,7 @@ public abstract class DatabaseAccessEntityImpl extends BasicEntityImpl implement
         String username = config().get(USERNAME);
         String password = config().get(PASSWORD);
         if (username == null) {
-            username = "user_" + Identifiers.makeRandomJavaId(6);
+            username = ("user_" + Identifiers.makeRandomJavaId(6)).toLowerCase();
         }
         if (password == null) {
             password = Identifiers.makeRandomJavaId(12);
