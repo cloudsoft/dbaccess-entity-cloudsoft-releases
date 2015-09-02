@@ -5,9 +5,9 @@ import org.apache.brooklyn.config.ConfigKey;
 import org.apache.brooklyn.core.config.ConfigKeys;
 import org.apache.brooklyn.core.sensor.BasicAttributeSensorAndConfigKey;
 import org.apache.brooklyn.entity.database.DatastoreMixins;
-import org.apache.brooklyn.entity.stock.BasicEntity;
+import org.apache.brooklyn.entity.stock.BasicApplication;
 
-public interface DatabaseAccessEntity extends BasicEntity, DatastoreMixins.HasDatastoreUrl {
+public interface DatabaseAccessEntity extends BasicApplication, DatastoreMixins.HasDatastoreUrl {
 
     ConfigKey<String> ENDPOINT_URL = ConfigKeys.newStringConfigKey("dbaccess.enpoint.url",
             "Connection string to the database in which the user should be created");

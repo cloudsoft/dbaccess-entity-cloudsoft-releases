@@ -1,8 +1,8 @@
 package io.cloudsoft.dbaccess;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Resources;
+import java.net.InetAddress;
+import java.net.URL;
+
 import org.apache.brooklyn.api.entity.EntitySpec;
 import org.apache.brooklyn.entity.database.DatastoreMixins;
 import org.apache.brooklyn.entity.database.mysql.MySqlNode;
@@ -14,7 +14,9 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.net.URL;
+import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Resources;
 
 public class MySqlDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAccessEntityIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(MySqlDatabaseAccessEntityIntegrationTest.class);
@@ -30,7 +32,8 @@ public class MySqlDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAc
         String creationScript = TemplateProcessor.processTemplateContents(creationTemplate, ImmutableMap.of(
                 "database", TEST_DATABASE,
                 "user", getAdminUserName(),
-                "password", TEST_ADMIN_PASSWORD
+                "password", TEST_ADMIN_PASSWORD,
+                "hostname", InetAddress.getLocalHost().getHostName()
         ));
 
         databaseNode = app.createAndManageChild(EntitySpec.create(MySqlNode.class)
@@ -46,7 +49,8 @@ public class MySqlDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAc
     @Test()
     public void testNoPasswordProvided() throws Exception {
         EntitySpec<MySqlDatabaseAccessEntity> spec = EntitySpec.create(MySqlDatabaseAccessEntity.class);
-        testAccess(createDatabaseAccessEntity(spec));
+        MySqlDatabaseAccessEntity entity = createDatabaseAccessEntity(spec);
+        runTest(entity);
     }
 
     @Test()
@@ -57,7 +61,12 @@ public class MySqlDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAc
         MySqlDatabaseAccessEntity entity = createDatabaseAccessEntity(spec);
         EntityTestUtils.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.USERNAME, TEST_USERNAME);
         EntityTestUtils.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.PASSWORD, TEST_PASSWORD);
-        testAccess(entity);
+        runTest(entity);
+    }
+
+    @Override
+    protected String getExpectedAccessDeniedMessage(String username) {
+        return String.format("Access denied for user '%s'@", username);
     }
 
     @Override
