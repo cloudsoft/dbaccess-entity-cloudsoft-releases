@@ -1,12 +1,6 @@
 package io.cloudsoft.dbaccess;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.brooklyn.api.entity.Entity;
-import org.apache.brooklyn.api.entity.EntitySpec;
-import org.apache.brooklyn.api.location.Location;
-import org.apache.brooklyn.core.sensor.DependentConfiguration;
-import org.apache.brooklyn.core.test.BrooklynAppLiveTestSupport;
-import org.apache.brooklyn.entity.database.DatastoreMixins;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -16,6 +10,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+
+import brooklyn.entity.BrooklynAppLiveTestSupport;
+import brooklyn.entity.Entity;
+import brooklyn.entity.database.DatastoreMixins;
+import brooklyn.entity.proxying.EntitySpec;
+import brooklyn.event.basic.DependentConfiguration;
+import brooklyn.location.Location;
 
 public abstract class AbstractDatabaseAccessEntityIntegrationTest extends BrooklynAppLiveTestSupport {
     protected static final String TEST_DATABASE = "testdatabase";
@@ -38,9 +39,9 @@ public abstract class AbstractDatabaseAccessEntityIntegrationTest extends Brookl
 
     protected void testAccess(Entity entity) throws Exception {
         String database = entity.config().get(DatabaseAccessEntity.DATABASE);
-        String username = entity.sensors().get(DatabaseAccessEntity.USERNAME);
-        String password = entity.sensors().get(DatabaseAccessEntity.PASSWORD);
-        String url = entity.sensors().get(DatabaseAccessEntity.DATASTORE_URL);
+        String username = entity.getAttribute(DatabaseAccessEntity.USERNAME);
+        String password = entity.getAttribute(DatabaseAccessEntity.PASSWORD);
+        String url = entity.getAttribute(DatabaseAccessEntity.DATASTORE_URL);
         String endpoint = entity.config().get(DatabaseAccessEntity.ENDPOINT_URL);
         Assert.assertEquals(url, String.format("%s%s?user=%s&password=%s", endpoint, database, username, password));
         connect(url);

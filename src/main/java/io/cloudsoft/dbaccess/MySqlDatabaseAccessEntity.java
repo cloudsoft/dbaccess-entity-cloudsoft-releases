@@ -1,6 +1,7 @@
 package io.cloudsoft.dbaccess;
 
-import org.apache.brooklyn.api.entity.ImplementedBy;
+
+import brooklyn.entity.proxying.ImplementedBy;
 
 @ImplementedBy(MySqlDatabaseAccessEntityImpl.class)
 public interface MySqlDatabaseAccessEntity extends DatabaseAccessEntity {

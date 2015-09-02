@@ -1,11 +1,12 @@
 package io.cloudsoft.dbaccess;
 
+
+import brooklyn.config.ConfigKey;
+import brooklyn.entity.basic.BasicEntity;
+import brooklyn.entity.basic.ConfigKeys;
+import brooklyn.entity.database.DatastoreMixins;
+import brooklyn.event.basic.BasicAttributeSensorAndConfigKey;
 import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
-import org.apache.brooklyn.config.ConfigKey;
-import org.apache.brooklyn.core.config.ConfigKeys;
-import org.apache.brooklyn.core.sensor.BasicAttributeSensorAndConfigKey;
-import org.apache.brooklyn.entity.database.DatastoreMixins;
-import org.apache.brooklyn.entity.stock.BasicEntity;
 
 public interface DatabaseAccessEntity extends BasicEntity, DatastoreMixins.HasDatastoreUrl {
 
@@ -21,10 +22,10 @@ public interface DatabaseAccessEntity extends BasicEntity, DatastoreMixins.HasDa
     ConfigKey<String> DATABASE = ConfigKeys.newStringConfigKey("dbaccess.database",
             "Database in which the user should be created");
 
-    BasicAttributeSensorAndConfigKey<String> USERNAME = new BasicAttributeSensorAndConfigKey<>(
+    BasicAttributeSensorAndConfigKey<String> USERNAME = new BasicAttributeSensorAndConfigKey<String>(
             String.class, "dbaccess.username", "Displays the username which has been created");
 
-    BasicAttributeSensorAndConfigKey<String> PASSWORD = new BasicAttributeSensorAndConfigKey<>(
+    BasicAttributeSensorAndConfigKey<String> PASSWORD = new BasicAttributeSensorAndConfigKey<String>(
             String.class, "dbaccess.password", "Displays the password which has been created");
 
     DatabaseAccessClient createClient();

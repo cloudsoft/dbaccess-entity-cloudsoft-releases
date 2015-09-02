@@ -1,6 +1,7 @@
 package io.cloudsoft.dbaccess;
 
-import org.apache.brooklyn.api.entity.ImplementedBy;
+
+import brooklyn.entity.proxying.ImplementedBy;
 
 @ImplementedBy(PostgresDatabaseAccessEntityImpl.class)
 public interface PostgresDatabaseAccessEntity extends DatabaseAccessEntity {

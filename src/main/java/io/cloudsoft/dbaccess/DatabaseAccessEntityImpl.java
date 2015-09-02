@@ -1,9 +1,10 @@
 package io.cloudsoft.dbaccess;
 
 import com.google.api.client.repackaged.com.google.common.base.Preconditions;
+
+import brooklyn.entity.basic.BasicEntityImpl;
+import brooklyn.util.text.Identifiers;
 import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
-import org.apache.brooklyn.entity.stock.BasicEntityImpl;
-import org.apache.brooklyn.util.text.Identifiers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +15,7 @@ public abstract class DatabaseAccessEntityImpl extends BasicEntityImpl implement
     @Override
     public void init() {
         super.init();
-        String endpoint = config().get(ENDPOINT_URL);
+        String endpoint = getConfig(ENDPOINT_URL);
         Preconditions.checkNotNull(endpoint, "endpoint URL must be set");
         String database = config().get(DATABASE);
         Preconditions.checkNotNull(database, "database must be set");
@@ -28,12 +29,12 @@ public abstract class DatabaseAccessEntityImpl extends BasicEntityImpl implement
         if (password == null) {
             password = Identifiers.makeRandomJavaId(12);
         }
-        sensors().set(USERNAME, username);
-        sensors().set(PASSWORD, password);
+        setAttribute(USERNAME, username);
+        setAttribute(PASSWORD, password);
         LOG.info("Creating user");
         DatabaseAccessClient client = createClient();
         client.createUser(username, password);
-        sensors().set(DATASTORE_URL, String.format("%s%s?user=%s&password=%s", endpoint, database, username, password));
+        setAttribute(DATASTORE_URL, String.format("%s%s?user=%s&password=%s", endpoint, database, username, password));
     }
 
 }

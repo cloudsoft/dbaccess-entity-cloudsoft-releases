@@ -3,11 +3,6 @@ package io.cloudsoft.dbaccess;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
-import org.apache.brooklyn.api.entity.EntitySpec;
-import org.apache.brooklyn.entity.database.DatastoreMixins;
-import org.apache.brooklyn.entity.database.mysql.MySqlNode;
-import org.apache.brooklyn.test.EntityTestUtils;
-import org.apache.brooklyn.util.core.text.TemplateProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -15,6 +10,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.net.URL;
+
+import brooklyn.entity.database.DatastoreMixins;
+import brooklyn.entity.database.mysql.MySqlNode;
+import brooklyn.entity.proxying.EntitySpec;
+import brooklyn.test.EntityTestUtils;
+import brooklyn.util.text.TemplateProcessor;
 
 public class MySqlDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAccessEntityIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(MySqlDatabaseAccessEntityIntegrationTest.class);
