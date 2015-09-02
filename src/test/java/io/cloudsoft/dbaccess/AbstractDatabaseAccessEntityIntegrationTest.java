@@ -6,9 +6,11 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 
+import java.net.InetAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import brooklyn.entity.BrooklynAppLiveTestSupport;
@@ -17,6 +19,7 @@ import brooklyn.entity.database.DatastoreMixins;
 import brooklyn.entity.proxying.EntitySpec;
 import brooklyn.event.basic.DependentConfiguration;
 import brooklyn.location.Location;
+import brooklyn.util.text.Strings;
 
 public abstract class AbstractDatabaseAccessEntityIntegrationTest extends BrooklynAppLiveTestSupport {
     protected static final String TEST_DATABASE = "testdatabase";
@@ -55,7 +58,10 @@ public abstract class AbstractDatabaseAccessEntityIntegrationTest extends Brookl
     public void connect(String url) throws Exception {
         try {
             Class.forName(getDriverName());
-            String jdbcUrl = String.format("jdbc:%s", url);
+            // For MySQL, the endpoint of the node is in the form "mysql://hostname:3306/", however we are only allowing
+            // login from <user>@localhost and <user>@*, so swap out the hostname in the endpoint for 'localhost'
+            String localhostUrl = Strings.replaceAll(url, InetAddress.getLocalHost().getHostName(), "localhost");
+            String jdbcUrl = String.format("jdbc:%s", localhostUrl);
             LOG.info("Connecting to " + jdbcUrl);
             connect = DriverManager.getConnection(jdbcUrl);
             statement = connect.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -86,9 +92,24 @@ public abstract class AbstractDatabaseAccessEntityIntegrationTest extends Brookl
         return app.createAndManageChild(spec);
     }
 
+    protected void runTest(DatabaseAccessEntity entity) throws Exception {
+        testAccess(entity);
+        entity.stop();
+        try {
+            testAccess(entity);
+            Assert.fail("able to access database after entity stopped, expected authentication failure");
+        } catch (SQLException e) {
+            String message = getExpectedAccessDeniedMessage(entity.getAttribute(DatabaseAccessEntity.USERNAME));
+            Assert.assertTrue(e.getMessage().contains(message),
+                    "Expected \"" + message + "...\" exception, got: " + e.getMessage());
+        }
+    }
+
     protected abstract String getDatabaseNamesStatement();
 
     protected abstract String getDriverName();
 
     protected abstract String getAdminUserName();
+
+    protected abstract String getExpectedAccessDeniedMessage(String username);
 }

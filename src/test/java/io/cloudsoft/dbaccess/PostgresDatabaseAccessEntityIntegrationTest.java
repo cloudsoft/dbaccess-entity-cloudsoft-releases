@@ -10,7 +10,6 @@ import brooklyn.test.EntityTestUtils;
 
 public class PostgresDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAccessEntityIntegrationTest {
 
-
     protected static final String TEST_ADMIN_USER = "postgres";
 
     @BeforeMethod(alwaysRun = true)
@@ -31,7 +30,8 @@ public class PostgresDatabaseAccessEntityIntegrationTest extends AbstractDatabas
     @Test()
     public void testNoPasswordProvided() throws Exception {
         EntitySpec<PostgresDatabaseAccessEntity> spec = EntitySpec.create(PostgresDatabaseAccessEntity.class);
-        testAccess(createDatabaseAccessEntity(spec));
+        PostgresDatabaseAccessEntity entity = createDatabaseAccessEntity(spec);
+        runTest(entity);
     }
 
     @Test()
@@ -42,7 +42,7 @@ public class PostgresDatabaseAccessEntityIntegrationTest extends AbstractDatabas
         PostgresDatabaseAccessEntity entity = createDatabaseAccessEntity(spec);
         EntityTestUtils.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.USERNAME, TEST_USERNAME);
         EntityTestUtils.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.PASSWORD, TEST_PASSWORD);
-        testAccess(entity);
+        runTest(entity);
     }
 
     @Override
@@ -58,5 +58,10 @@ public class PostgresDatabaseAccessEntityIntegrationTest extends AbstractDatabas
     @Override
     protected String getAdminUserName() {
         return TEST_ADMIN_USER;
+    }
+
+    @Override
+    protected String getExpectedAccessDeniedMessage(String username) {
+        return String.format("FATAL: role \"%s\" does not exist", username);
     }
 }

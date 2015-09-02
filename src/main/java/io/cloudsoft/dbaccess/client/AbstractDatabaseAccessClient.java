@@ -45,9 +45,8 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
 
     @Override
     public void createUser(String username, String password) {
-
         try {
-            Class.forName("org.postgresql.Driver");
+            Class.forName(getDriverClass());
         } catch (ClassNotFoundException e) {
             Exceptions.propagateIfFatal(e);
         }
@@ -57,6 +56,21 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
         Connection connection = getConnection(jdbcUrl);
         createUser(connection, username, password);
         grantPermissions(connection, username, password);
+        close(connection);
+    }
+
+    @Override
+    public void deleteUser(String username) {
+        try {
+            Class.forName(getDriverClass());
+        } catch (ClassNotFoundException e) {
+            Exceptions.propagateIfFatal(e);
+        }
+        String jdbcUrl = String.format("jdbc:%s%s?user=%s&password=%s", getEndpoint(), getDatabase(), getAdminUsername(), getAdminPassword());
+        LOG.info("Connecting to " + jdbcUrl);
+
+        Connection connection = getConnection(jdbcUrl);
+        deleteUser(connection, username);
         close(connection);
     }
 
@@ -90,6 +104,21 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
         }
     }
 
+    private void deleteUser(Connection connection, String username) {
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            for (String deleteUserStatement : getDeleteUserStatements(username)){
+                statement.execute(deleteUserStatement);
+            }
+        } catch (SQLException e) {
+            LOG.error("error executing SQL for deleteUser: {}", e);
+            Exceptions.propagateIfFatal(e);
+        } finally {
+            close(statement);
+        }
+    }
+
     public void close(Statement statement) {
         try {
             if (statement != null) {
@@ -113,6 +142,10 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
     protected abstract List<String> getCreateUserStatements(String username, String password);
 
     protected abstract List<String> getGrantPermissionsStatements(String username, String password);
+
+    protected abstract List<String> getDeleteUserStatements(String username);
+
+    protected abstract String getDriverClass();
 
     private Connection getConnection(String jdbcUrl){
         try {

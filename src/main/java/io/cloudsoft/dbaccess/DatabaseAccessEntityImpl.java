@@ -1,14 +1,15 @@
 package io.cloudsoft.dbaccess;
 
-import com.google.api.client.repackaged.com.google.common.base.Preconditions;
-
-import brooklyn.entity.basic.BasicEntityImpl;
-import brooklyn.util.text.Identifiers;
-import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class DatabaseAccessEntityImpl extends BasicEntityImpl implements DatabaseAccessEntity {
+import brooklyn.entity.basic.BasicApplicationImpl;
+import brooklyn.util.text.Identifiers;
+import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
+
+import com.google.api.client.repackaged.com.google.common.base.Preconditions;
+
+public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl implements DatabaseAccessEntity {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseAccessEntityImpl.class);
 
@@ -37,4 +38,11 @@ public abstract class DatabaseAccessEntityImpl extends BasicEntityImpl implement
         setAttribute(DATASTORE_URL, String.format("%s%s?user=%s&password=%s", endpoint, database, username, password));
     }
 
+    @Override
+    public void stop() {
+        String username = getAttribute(USERNAME);
+        DatabaseAccessClient client = createClient();
+        client.deleteUser(username);
+        super.destroy();
+    }
 }

@@ -8,9 +8,16 @@ public class PostgresAccessClient extends AbstractDatabaseAccessClient {
 
     private static final String CREATE_USER = "CREATE USER %s WITH ENCRYPTED PASSWORD '%s'";
     private static final String GRANT_PERMISSIONS = "GRANT SELECT ON ALL TABLES IN SCHEMA public TO %s;";
+    private static final String DISOWN_USER = "DROP OWNED BY %s";
+    private static final String DROP_USER = "DROP USER %s";
 
     public PostgresAccessClient(String endpoint, String adminUsername, String adminPassword, String database) {
         super(endpoint, adminUsername, adminPassword, database);
+    }
+
+    @Override
+    protected String getDriverClass() {
+        return "org.postgresql.Driver";
     }
 
     @Override
@@ -21,5 +28,13 @@ public class PostgresAccessClient extends AbstractDatabaseAccessClient {
     @Override
     protected List<String> getGrantPermissionsStatements(String username, String password) {
         return ImmutableList.of(String.format(GRANT_PERMISSIONS, username));
+    }
+
+    @Override
+    protected List<String> getDeleteUserStatements(String username) {
+        return ImmutableList.of(
+                String.format(DISOWN_USER, username),
+                String.format(DROP_USER, username)
+        );
     }
 }

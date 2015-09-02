@@ -2,13 +2,13 @@ package io.cloudsoft.dbaccess;
 
 
 import brooklyn.config.ConfigKey;
-import brooklyn.entity.basic.BasicEntity;
+import brooklyn.entity.basic.BasicApplication;
 import brooklyn.entity.basic.ConfigKeys;
 import brooklyn.entity.database.DatastoreMixins;
 import brooklyn.event.basic.BasicAttributeSensorAndConfigKey;
 import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 
-public interface DatabaseAccessEntity extends BasicEntity, DatastoreMixins.HasDatastoreUrl {
+public interface DatabaseAccessEntity extends BasicApplication, DatastoreMixins.HasDatastoreUrl {
 
     ConfigKey<String> ENDPOINT_URL = ConfigKeys.newStringConfigKey("dbaccess.enpoint.url",
             "Connection string to the database in which the user should be created");
