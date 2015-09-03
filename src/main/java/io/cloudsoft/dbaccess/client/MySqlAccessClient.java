@@ -2,7 +2,7 @@ package io.cloudsoft.dbaccess.client;
 
 import java.util.List;
 
-import org.python.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList;
 
 public class MySqlAccessClient extends AbstractDatabaseAccessClient {
     

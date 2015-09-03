@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 
-import com.google.api.client.repackaged.com.google.common.base.Preconditions;
+import com.google.common.base.Preconditions;
 
 public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl implements DatabaseAccessEntity {
 
@@ -37,6 +37,7 @@ public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl impl
         sensors().set(PASSWORD, password);
         config().set(USERNAME, username);
         config().set(PASSWORD, password);
+        this.setDisplayName(String.format("DBAccess (%s): %s", database, username));
         LOG.info("Creating user");
         DatabaseAccessClient client = createClient();
         client.createUser(username, password);
@@ -50,6 +51,6 @@ public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl impl
             DatabaseAccessClient client = createClient();
             client.deleteUser(username);
         }
-        super.destroy();
+        super.stop();
     }
 }
