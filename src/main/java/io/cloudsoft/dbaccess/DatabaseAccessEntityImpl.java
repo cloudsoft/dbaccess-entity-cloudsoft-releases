@@ -1,9 +1,12 @@
 package io.cloudsoft.dbaccess;
 
+import java.util.Collection;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import brooklyn.entity.basic.BasicApplicationImpl;
+import brooklyn.location.Location;
 import brooklyn.util.text.Identifiers;
 import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 
@@ -14,8 +17,8 @@ public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl impl
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseAccessEntityImpl.class);
 
     @Override
-    public void init() {
-        super.init();
+    public void start(Collection<? extends Location> locations) {
+        super.start(locations);
         String endpoint = getConfig(ENDPOINT_URL);
         Preconditions.checkNotNull(endpoint, "endpoint URL must be set");
         String database = config().get(DATABASE);
@@ -30,7 +33,9 @@ public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl impl
         if (password == null) {
             password = Identifiers.makeRandomJavaId(12);
         }
+        config().set(USERNAME, username);
         setAttribute(USERNAME, username);
+        config().set(PASSWORD, password);
         setAttribute(PASSWORD, password);
         LOG.info("Creating user");
         DatabaseAccessClient client = createClient();
