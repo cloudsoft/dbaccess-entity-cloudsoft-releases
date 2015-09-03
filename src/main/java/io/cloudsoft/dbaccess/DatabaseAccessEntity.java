@@ -10,7 +10,7 @@ import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 
 public interface DatabaseAccessEntity extends BasicApplication, DatastoreMixins.HasDatastoreUrl {
 
-    ConfigKey<String> ENDPOINT_URL = ConfigKeys.newStringConfigKey("dbaccess.enpoint.url",
+    ConfigKey<String> ENDPOINT_URL = ConfigKeys.newStringConfigKey("dbaccess.endpoint.url",
             "Connection string to the database in which the user should be created");
 
     ConfigKey<String> ADMIN_USER = ConfigKeys.newStringConfigKey("dbaccess.admin.user",
