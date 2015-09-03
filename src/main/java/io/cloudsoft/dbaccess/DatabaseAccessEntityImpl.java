@@ -5,6 +5,8 @@ import org.apache.brooklyn.util.text.Identifiers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 
 import com.google.api.client.repackaged.com.google.common.base.Preconditions;
@@ -12,6 +14,7 @@ import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl implements DatabaseAccessEntity {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseAccessEntityImpl.class);
+    private final AtomicBoolean userDeleted = new AtomicBoolean(false);
 
     @Override
     public void init() {
@@ -42,9 +45,11 @@ public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl impl
 
     @Override
     public void stop() {
-        String username = getAttribute(USERNAME);
-        DatabaseAccessClient client = createClient();
-        client.deleteUser(username);
+        if (!userDeleted.getAndSet(true)) {
+            String username = getAttribute(USERNAME);
+            DatabaseAccessClient client = createClient();
+            client.deleteUser(username);
+        }
         super.destroy();
     }
 }
