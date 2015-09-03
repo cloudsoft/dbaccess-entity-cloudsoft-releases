@@ -32,6 +32,8 @@ public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl impl
         }
         sensors().set(USERNAME, username);
         sensors().set(PASSWORD, password);
+        config().set(USERNAME, username);
+        config().set(PASSWORD, password);
         LOG.info("Creating user");
         DatabaseAccessClient client = createClient();
         client.createUser(username, password);
