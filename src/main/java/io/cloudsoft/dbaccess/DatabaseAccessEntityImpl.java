@@ -1,12 +1,11 @@
 package io.cloudsoft.dbaccess;
 
-import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import brooklyn.entity.basic.BasicApplicationImpl;
-import brooklyn.location.Location;
 import brooklyn.util.text.Identifiers;
 import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 
@@ -15,10 +14,11 @@ import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl implements DatabaseAccessEntity {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseAccessEntityImpl.class);
+    private final AtomicBoolean userDeleted = new AtomicBoolean(false);
 
     @Override
-    public void start(Collection<? extends Location> locations) {
-        super.start(locations);
+    public void init() {
+        super.init();
         String endpoint = getConfig(ENDPOINT_URL);
         Preconditions.checkNotNull(endpoint, "endpoint URL must be set");
         String database = config().get(DATABASE);
@@ -45,9 +45,11 @@ public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl impl
 
     @Override
     public void stop() {
-        String username = getAttribute(USERNAME);
-        DatabaseAccessClient client = createClient();
-        client.deleteUser(username);
+        if (!userDeleted.getAndSet(true)) {
+            String username = getAttribute(USERNAME);
+            DatabaseAccessClient client = createClient();
+            client.deleteUser(username);
+        }
         super.destroy();
     }
 }
