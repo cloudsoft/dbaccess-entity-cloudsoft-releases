@@ -41,7 +41,11 @@ public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl impl
         LOG.info("Creating user");
         DatabaseAccessClient client = createClient();
         client.createUser(username, password);
-        sensors().set(DATASTORE_URL, String.format("%s%s?user=%s&password=%s", endpoint, database, username, password));
+        sensors().set(DATASTORE_URL, makeDatastoreUrl(endpoint, database, username, password));
+    }
+
+    protected String makeDatastoreUrl(String endpoint, String database, String username, String password) {
+        return String.format("%s/%s?user=%s&password=%s", endpoint, database, username, password);
     }
 
     @Override

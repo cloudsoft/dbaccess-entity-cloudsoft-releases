@@ -41,6 +41,11 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
     public String getDatabase() {
         return database;
     }
+    
+    public String connectionString() {
+        return String.format("jdbc:%s%s?user=%s&password=%s", getEndpoint(), getDatabase(), getAdminUsername(), getAdminPassword());
+        
+    }
 
     @Override
     public void createUser(String username, String password) {
@@ -49,7 +54,7 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
         } catch (ClassNotFoundException e) {
             Exceptions.propagateIfFatal(e);
         }
-        String jdbcUrl = String.format("jdbc:%s%s?user=%s&password=%s", getEndpoint(), getDatabase(), getAdminUsername(), getAdminPassword());
+        String jdbcUrl = connectionString();
         LOG.info("Connecting to " + jdbcUrl);
 
         Connection connection = getConnection(jdbcUrl);
@@ -65,7 +70,8 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
         } catch (ClassNotFoundException e) {
             Exceptions.propagateIfFatal(e);
         }
-        String jdbcUrl = String.format("jdbc:%s%s?user=%s&password=%s", getEndpoint(), getDatabase(), getAdminUsername(), getAdminPassword());
+
+        String jdbcUrl = connectionString();
         LOG.info("Connecting to " + jdbcUrl);
 
         Connection connection = getConnection(jdbcUrl);
