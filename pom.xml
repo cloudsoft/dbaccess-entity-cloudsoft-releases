@@ -81,6 +81,12 @@
             <version>9.1-901.jdbc4</version>
             <scope>test</scope>
         </dependency>
+        
+        <dependency>
+        	<groupId>io.cloudsoft.cfentity</groupId>
+        	<artifactId>cf-entity</artifactId>
+        	<version>0.1.0-SNAPSHOT</version>
+        </dependency>
 
     </dependencies>
 

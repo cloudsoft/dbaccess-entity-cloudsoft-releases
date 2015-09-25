@@ -8,8 +8,6 @@ import org.apache.brooklyn.entity.database.DatastoreMixins;
 import org.apache.brooklyn.entity.database.mysql.MySqlNode;
 import org.apache.brooklyn.test.EntityTestUtils;
 import org.apache.brooklyn.util.core.text.TemplateProcessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -19,7 +17,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 
 public class MySqlDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAccessEntityIntegrationTest {
-    private static final Logger LOG = LoggerFactory.getLogger(MySqlDatabaseAccessEntityIntegrationTest.class);
 
     @BeforeMethod(alwaysRun = true)
     @Override
@@ -59,6 +56,7 @@ public class MySqlDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAc
                 .configure(DatabaseAccessEntity.USERNAME, TEST_USERNAME)
                 .configure(DatabaseAccessEntity.PASSWORD, TEST_PASSWORD);
         MySqlDatabaseAccessEntity entity = createDatabaseAccessEntity(spec);
+        entity.bind();
         EntityTestUtils.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.USERNAME, TEST_USERNAME);
         EntityTestUtils.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.PASSWORD, TEST_PASSWORD);
         runTest(entity);

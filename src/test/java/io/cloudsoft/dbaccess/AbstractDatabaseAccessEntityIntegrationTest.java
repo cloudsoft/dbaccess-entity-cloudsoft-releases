@@ -1,17 +1,22 @@
 package io.cloudsoft.dbaccess;
 
 import com.google.common.collect.ImmutableList;
+
 import org.apache.brooklyn.api.entity.Entity;
 import org.apache.brooklyn.api.entity.EntitySpec;
 import org.apache.brooklyn.api.location.Location;
 import org.apache.brooklyn.core.sensor.DependentConfiguration;
 import org.apache.brooklyn.core.test.BrooklynAppLiveTestSupport;
 import org.apache.brooklyn.entity.database.DatastoreMixins;
+import org.apache.brooklyn.util.exceptions.Exceptions;
 import org.apache.brooklyn.util.text.Strings;
+import org.python.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
+
+import io.cloudsoft.cfentity.CloudFoundryService;
 
 import java.net.InetAddress;
 import java.sql.Connection;
@@ -19,6 +24,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.ExecutionException;
 
 public abstract class AbstractDatabaseAccessEntityIntegrationTest extends BrooklynAppLiveTestSupport {
     protected static final String TEST_DATABASE = "testdatabase";
@@ -88,7 +94,13 @@ public abstract class AbstractDatabaseAccessEntityIntegrationTest extends Brookl
         spec.configure(DatabaseAccessEntity.ADMIN_USER, getAdminUserName());
         spec.configure(DatabaseAccessEntity.ADMIN_PASSWORD, TEST_ADMIN_PASSWORD);
         spec.configure(DatabaseAccessEntity.ENDPOINT_URL, DependentConfiguration.attributeWhenReady(databaseNode, DatastoreMixins.DATASTORE_URL));
-        return app.createAndManageChild(spec);
+        T entity = app.createAndManageChild(spec);
+        try {
+			entity.invoke(CloudFoundryService.BIND, ImmutableMap.<String, Object>of()).get();
+		} catch (Exception e) {
+			Exceptions.propagateIfFatal(e);
+		}
+        return entity;
     }
 
     protected void runTest(DatabaseAccessEntity entity) throws Exception {

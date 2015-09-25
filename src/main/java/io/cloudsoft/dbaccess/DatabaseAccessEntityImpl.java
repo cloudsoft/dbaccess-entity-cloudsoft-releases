@@ -18,14 +18,28 @@ public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl impl
 
     @Override
     public void init() {
-        super.init();
-        String endpoint = config().get(ENDPOINT_URL);
-        Preconditions.checkNotNull(endpoint, "endpoint URL must be set");
-        String database = config().get(DATABASE);
-        Preconditions.checkNotNull(database, "database must be set");
+        super.init(); 
+        Preconditions.checkNotNull(config().get(ENDPOINT_URL), "endpoint URL must be set");
+        Preconditions.checkNotNull(config().get(DATABASE), "database must be set");
         Preconditions.checkNotNull(config().get(ADMIN_USER), "admin user must be set");
         Preconditions.checkNotNull(config().get(ADMIN_PASSWORD), "admin password must be set");
-        String username = config().get(USERNAME);
+    }
+
+    protected String makeDatastoreUrl(String endpoint, String database, String username, String password) {
+        return String.format("%s%s?user=%s&password=%s", endpoint, database, username, password);
+    }
+
+    @Override
+    public void stop() {
+        unbind();
+        super.stop();
+    }
+    
+    @Override
+    public void bind() {
+        String endpoint = config().get(ENDPOINT_URL);
+        String database = config().get(DATABASE);
+    	String username = config().get(USERNAME);
         String password = config().get(PASSWORD);
         if (username == null) {
             username = ("user_" + Identifiers.makeRandomJavaId(6)).toLowerCase();
@@ -43,18 +57,13 @@ public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl impl
         client.createUser(username, password);
         sensors().set(DATASTORE_URL, makeDatastoreUrl(endpoint, database, username, password));
     }
-
-    protected String makeDatastoreUrl(String endpoint, String database, String username, String password) {
-        return String.format("%s/%s?user=%s&password=%s", endpoint, database, username, password);
-    }
-
+    
     @Override
-    public void stop() {
-        if (!userDeleted.getAndSet(true)) {
+    public void unbind() {
+    	if (!userDeleted.getAndSet(true)) {
             String username = getAttribute(USERNAME);
             DatabaseAccessClient client = createClient();
             client.deleteUser(username);
         }
-        super.stop();
     }
 }
