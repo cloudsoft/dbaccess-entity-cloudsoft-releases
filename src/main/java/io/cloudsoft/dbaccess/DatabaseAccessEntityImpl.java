@@ -14,7 +14,7 @@ import com.google.common.base.Preconditions;
 public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl implements DatabaseAccessEntity {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseAccessEntityImpl.class);
-    private final AtomicBoolean userDeleted = new AtomicBoolean(false);
+    private final AtomicBoolean serviceBound = new AtomicBoolean(false);
 
     @Override
     public void init() {
@@ -37,33 +37,39 @@ public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl impl
     
     @Override
     public void bind() {
-        String endpoint = config().get(ENDPOINT_URL);
-        String database = config().get(DATABASE);
-    	String username = config().get(USERNAME);
-        String password = config().get(PASSWORD);
-        if (username == null) {
-            username = ("user_" + Identifiers.makeRandomJavaId(6)).toLowerCase();
+        boolean previouslyBound = serviceBound.getAndSet(true);
+        if (previouslyBound) {
+            throw new IllegalStateException("Service is already bound");
+        } else {
+            String endpoint = config().get(ENDPOINT_URL);
+            String database = config().get(DATABASE);
+            String username = config().get(USERNAME);
+            String password = config().get(PASSWORD);
+            if (username == null) {
+                username = ("user_" + Identifiers.makeRandomJavaId(6)).toLowerCase();
+            }
+            if (password == null) {
+                password = Identifiers.makeRandomJavaId(12);
+            }
+            sensors().set(USERNAME, username);
+            sensors().set(PASSWORD, password);
+            this.setDisplayName(String.format("DBAccess (%s): %s", database, username));
+            LOG.info("Creating user");
+            DatabaseAccessClient client = createClient();
+            client.createUser(username, password);
+            sensors().set(DATASTORE_URL, makeDatastoreUrl(endpoint, database, username, password));
         }
-        if (password == null) {
-            password = Identifiers.makeRandomJavaId(12);
-        }
-        sensors().set(USERNAME, username);
-        sensors().set(PASSWORD, password);
-        config().set(USERNAME, username);
-        config().set(PASSWORD, password);
-        this.setDisplayName(String.format("DBAccess (%s): %s", database, username));
-        LOG.info("Creating user");
-        DatabaseAccessClient client = createClient();
-        client.createUser(username, password);
-        sensors().set(DATASTORE_URL, makeDatastoreUrl(endpoint, database, username, password));
     }
     
     @Override
     public void unbind() {
-    	if (!userDeleted.getAndSet(true)) {
+        if (serviceBound.getAndSet(false)) {
             String username = getAttribute(USERNAME);
             DatabaseAccessClient client = createClient();
             client.deleteUser(username);
+            sensors().set(USERNAME, null);
+            sensors().set(PASSWORD, null);
+            sensors().set(DATASTORE_URL, null);
         }
     }
 }

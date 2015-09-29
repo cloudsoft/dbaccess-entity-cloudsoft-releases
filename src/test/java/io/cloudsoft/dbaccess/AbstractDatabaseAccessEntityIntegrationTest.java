@@ -24,7 +24,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.concurrent.ExecutionException;
 
 public abstract class AbstractDatabaseAccessEntityIntegrationTest extends BrooklynAppLiveTestSupport {
     protected static final String TEST_DATABASE = "testdatabase";
@@ -96,10 +95,10 @@ public abstract class AbstractDatabaseAccessEntityIntegrationTest extends Brookl
         spec.configure(DatabaseAccessEntity.ENDPOINT_URL, DependentConfiguration.attributeWhenReady(databaseNode, DatastoreMixins.DATASTORE_URL));
         T entity = app.createAndManageChild(spec);
         try {
-			entity.invoke(CloudFoundryService.BIND, ImmutableMap.<String, Object>of()).get();
-		} catch (Exception e) {
-			Exceptions.propagateIfFatal(e);
-		}
+            entity.invoke(CloudFoundryService.BIND, ImmutableMap.<String, Object>of()).get();
+        } catch (Exception e) {
+            Exceptions.propagateIfFatal(e);
+        }
         return entity;
     }
 
