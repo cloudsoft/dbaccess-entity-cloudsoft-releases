@@ -43,7 +43,11 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
     }
     
     public String connectionString() {
-        return String.format("jdbc:%s%s?user=%s&password=%s", getEndpoint(), getDatabase(), getAdminUsername(), getAdminPassword());
+        String endpoint = getEndpoint();
+        if (!endpoint.endsWith("/")) {
+            endpoint = endpoint + "/";
+        }
+        return String.format("jdbc:%s%s?user=%s&password=%s", endpoint, getDatabase(), getAdminUsername(), getAdminPassword());
         
     }
 

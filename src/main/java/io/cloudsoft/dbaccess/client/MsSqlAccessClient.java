@@ -2,6 +2,8 @@ package io.cloudsoft.dbaccess.client;
 
 import java.util.List;
 
+import org.apache.brooklyn.util.text.Strings;
+
 import com.google.common.collect.ImmutableList;
 
 public class MsSqlAccessClient extends AbstractDatabaseAccessClient {
@@ -73,8 +75,7 @@ public class MsSqlAccessClient extends AbstractDatabaseAccessClient {
 
     @Override
     public String connectionString() {
-        // jdbc:sqlserver://localhost;databaseName=AdventureWorks;integratedSecurity=true;
-        // "jdbc:sqlserver://localhost:1433;databaseName=AdventureWorks;user=UserName;password=*****";
-        return String.format("jdbc:%s;databaseName=%s;user=%s;password=%s", getEndpoint(), getDatabase(), getAdminUsername(), getAdminPassword());
+        String endpoint = Strings.removeFromEnd(getEndpoint(), "/");
+        return String.format("jdbc:%s;databaseName=%s;user=%s;password=%s", endpoint, getDatabase(), getAdminUsername(), getAdminPassword());
     }
 }
