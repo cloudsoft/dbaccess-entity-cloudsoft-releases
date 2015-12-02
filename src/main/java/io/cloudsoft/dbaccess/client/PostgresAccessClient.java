@@ -2,6 +2,8 @@ package io.cloudsoft.dbaccess.client;
 
 import java.util.List;
 
+import org.apache.brooklyn.api.objs.Configurable.ConfigurationSupport;
+
 import com.google.common.collect.ImmutableList;
 
 public class PostgresAccessClient extends AbstractDatabaseAccessClient {
@@ -11,8 +13,12 @@ public class PostgresAccessClient extends AbstractDatabaseAccessClient {
     private static final String DISOWN_USER = "DROP OWNED BY %s";
     private static final String DROP_USER = "DROP USER %s";
 
-    public PostgresAccessClient(String endpoint, String adminUsername, String adminPassword, String database) {
-        super(endpoint, adminUsername, adminPassword, database);
+    public PostgresAccessClient(String protocolScheme, String host, String port, 
+            String adminUsername, String adminPassword, String database) {
+        super(protocolScheme, host, port, adminUsername, adminPassword, database);
+    }
+    public PostgresAccessClient(ConfigurationSupport config) {
+        super(config);
     }
 
     @Override
@@ -37,4 +43,7 @@ public class PostgresAccessClient extends AbstractDatabaseAccessClient {
                 String.format(DROP_USER, username)
         );
     }
+    
+    protected String getJdbcUrlProtocolScheme() { return "jdbc:"+"postgresql"; }
+    
 }

@@ -7,8 +7,9 @@ public class MySqlDatabaseAccessEntityImpl extends DatabaseAccessEntityImpl impl
 
     @Override
     public DatabaseAccessClient createClient() {
-        return new MySqlAccessClient(config().get(ENDPOINT_URL), config().get(ADMIN_USER), config().get(ADMIN_PASSWORD),
-                config().get(DATABASE));
+        return new MySqlAccessClient(config());
     }
 
+    @Override public String getProtocolScheme() { return "mysql"; }
+    
 }

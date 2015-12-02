@@ -7,8 +7,9 @@ public class PostgresDatabaseAccessEntityImpl extends DatabaseAccessEntityImpl i
 
     @Override
     public DatabaseAccessClient createClient() {
-        return new PostgresAccessClient(config().get(ENDPOINT_URL), config().get(ADMIN_USER), config().get(ADMIN_PASSWORD),
-            config().get(DATABASE));
+        return new PostgresAccessClient(config());
     }
+
+    @Override public String getProtocolScheme() { return "postgres"; }
 
 }

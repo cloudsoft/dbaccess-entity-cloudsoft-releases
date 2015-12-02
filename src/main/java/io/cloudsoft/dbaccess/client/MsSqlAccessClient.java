@@ -2,7 +2,8 @@ package io.cloudsoft.dbaccess.client;
 
 import java.util.List;
 
-import org.apache.brooklyn.util.text.Strings;
+import org.apache.brooklyn.api.objs.Configurable.ConfigurationSupport;
+import org.apache.brooklyn.util.net.Urls;
 
 import com.google.common.collect.ImmutableList;
 
@@ -39,8 +40,12 @@ public class MsSqlAccessClient extends AbstractDatabaseAccessClient {
     private static final String DROP_LOGIN = "DROP LOGIN %s";
     private static final String DROP_USER = "DROP USER %s";
 
-    public MsSqlAccessClient(String endpoint, String adminUsername, String adminPassword, String database) {
-        super(endpoint, adminUsername, adminPassword, database);
+    public MsSqlAccessClient(String protocolScheme, String host, String port, 
+            String adminUsername, String adminPassword, String database) {
+        super(protocolScheme, host, port, adminUsername, adminPassword, database);
+    }
+    public MsSqlAccessClient(ConfigurationSupport config) {
+        super(config);
     }
 
     @Override
@@ -73,9 +78,13 @@ public class MsSqlAccessClient extends AbstractDatabaseAccessClient {
         );
     }
 
+    @Override protected String getJdbcUrlProtocolScheme() { return "jdbc:microsoft:sqlserver"; }
+    @Override protected String getJdbcUrlPropertiesSeparatorBefore() { return ";"; }
+    @Override protected String getJdbcUrlPropertiesSeparatorBetween() { return ";"; }
     @Override
-    public String connectionString() {
-        String endpoint = Strings.removeFromEnd(getEndpoint(), "/");
-        return String.format("jdbc:%s;databaseName=%s;user=%s;password=%s", endpoint, getDatabase(), getAdminUsername(), getAdminPassword());
+    protected String getJdbcUrlDatabaseSegmentWithPrefix() {
+        return getJdbcUrlPropertiesSeparatorBefore()+
+            "databasename="+Urls.encode(getDatabase());
     }
+    
 }

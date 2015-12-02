@@ -1,8 +1,6 @@
 package io.cloudsoft.dbaccess.client;
 
-import org.apache.brooklyn.util.exceptions.Exceptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.cloudsoft.dbaccess.DatabaseAccessEntity;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,46 +8,95 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
+import org.apache.brooklyn.api.objs.Configurable.ConfigurationSupport;
+import org.apache.brooklyn.util.exceptions.Exceptions;
+import org.apache.brooklyn.util.net.Urls;
+import org.apache.brooklyn.util.text.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+
 public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClient {
 
-    private final String endpoint;
+    private final String protocolScheme;
+    private final String host;
+    private final String port;
     private final String adminPassword;
     private final String adminUsername;
     private final String database;
 
     private static final Logger LOG = LoggerFactory.getLogger(PostgresAccessClient.class);
 
-    public AbstractDatabaseAccessClient(String endpoint, String adminUsername, String adminPassword, String database) {
-        this.endpoint = endpoint;
-        this.adminUsername = adminUsername;
-        this.adminPassword = adminPassword;
+    public AbstractDatabaseAccessClient(String protocolScheme, String host, String port, 
+            String adminUsername, String adminPassword, @Nullable String database) {
+        this.protocolScheme = Preconditions.checkNotNull(protocolScheme, "protocol scheme");
+        this.host = Preconditions.checkNotNull(host, "host");
+        this.port = Preconditions.checkNotNull(port, "port");
+        this.adminUsername = Preconditions.checkNotNull(adminUsername, "admin username");
+        this.adminPassword = Preconditions.checkNotNull(adminPassword, "admin password");
         this.database = database;
     }
 
-    protected String getEndpoint() {
-        return endpoint;
+    public AbstractDatabaseAccessClient(ConfigurationSupport config) {
+        this( 
+            config.get(DatabaseAccessEntity.PROTOCOL_SCHEME), 
+            config.get(DatabaseAccessEntity.HOST), 
+            config.get(DatabaseAccessEntity.PORT), 
+            config.get(DatabaseAccessEntity.ADMIN_USER), 
+            config.get(DatabaseAccessEntity.ADMIN_PASSWORD), 
+            config.get(DatabaseAccessEntity.DATABASE) ); 
     }
 
-    protected String getAdminPassword() {
-        return adminPassword;
+    protected String getProtocolScheme() {
+        return protocolScheme;
     }
-
+    
+    protected String getHost() {
+        return host;
+    }
+    
+    protected String getPort() {
+        return port;
+    }
+    
     protected String getAdminUsername() {
         return adminUsername;
+    }
+    
+    protected String getAdminPassword() {
+        return adminPassword;
     }
 
     public String getDatabase() {
         return database;
     }
     
-    public String connectionString() {
-        String endpoint = getEndpoint();
-        if (!endpoint.endsWith("/")) {
-            endpoint = endpoint + "/";
+    @Override
+    public String getJdbcUrl(String user, String pass) {
+        StringBuilder jdbcUrl = new StringBuilder();
+        jdbcUrl.append(getJdbcUrlProtocolScheme());
+        jdbcUrl.append("://");
+        jdbcUrl.append(getHost());
+        if (Strings.isNonBlank(getPort())) jdbcUrl.append(":"+getPort());
+        if (Strings.isNonBlank(getDatabase())) jdbcUrl.append(getJdbcUrlDatabaseSegmentWithPrefix());
+        if (user!=null) {
+            jdbcUrl.append(getJdbcUrlPropertiesSeparatorBefore());
+            jdbcUrl.append("user="+Urls.encode(user));
+            if (pass!=null) {
+                jdbcUrl.append(getJdbcUrlPropertiesSeparatorBetween());
+                jdbcUrl.append("password="+Urls.encode(pass));
+            }
         }
-        return String.format("jdbc:%s%s?user=%s&password=%s", endpoint, getDatabase(), getAdminUsername(), getAdminPassword());
-        
+        return jdbcUrl.toString();
     }
+    
+    protected String getJdbcUrlProtocolScheme() { return "jdbc:"+getProtocolScheme(); }
+    protected String getJdbcUrlPropertiesSeparatorBefore() { return "?"; }
+    protected String getJdbcUrlPropertiesSeparatorBetween() { return "&"; }
+    protected String getJdbcUrlDatabaseSegmentWithPrefix() { return "/"+getDatabase(); }
 
     @Override
     public void createUser(String username, String password) {
@@ -58,13 +105,17 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
         } catch (ClassNotFoundException e) {
             Exceptions.propagateIfFatal(e);
         }
-        String jdbcUrl = connectionString();
-        LOG.info("Connecting to " + jdbcUrl);
+        String jdbcUrl = getJdbcUrl(getAdminUsername(), getAdminPassword());
+        LOG.info("Connecting to " + jdbcUrl+" to create "+username);
 
         Connection connection = getConnection(jdbcUrl);
-        createUser(connection, username, password);
-        grantPermissions(connection, username, password);
-        close(connection);
+        try {
+            createUser(connection, username, password);
+            if (!grantPermissions(connection, username, password))
+                throw new IllegalStateException("Unable to create user '"+username+"'. Confirm admin credential and see logs for more information.");
+        } finally {
+            close(connection);
+        }
     }
 
     @Override
@@ -75,8 +126,8 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
             Exceptions.propagateIfFatal(e);
         }
 
-        String jdbcUrl = connectionString();
-        LOG.info("Connecting to " + jdbcUrl);
+        String jdbcUrl = getJdbcUrl(getAdminUsername(), getAdminPassword());
+        LOG.info("Connecting to " + jdbcUrl+" to delete "+username);
 
         Connection connection = getConnection(jdbcUrl);
         deleteUser(connection, username);
@@ -98,31 +149,35 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
         }
     }
 
-    private void grantPermissions(Connection connection, String username, String password) {
+    private boolean grantPermissions(Connection connection, String username, String password) {
         Statement statement = null;
         try {
             statement = connection.createStatement();
             for (String grantStatement : getGrantPermissionsStatements(username, password)){
                 statement.execute(grantStatement);
             }
+            return true;
         } catch (SQLException e) {
             LOG.error("error executing SQL for grantPermissions: {}", e);
             Exceptions.propagateIfFatal(e);
+            return false;
         } finally {
             close(statement);
         }
     }
 
-    private void deleteUser(Connection connection, String username) {
+    private boolean deleteUser(Connection connection, String username) {
         Statement statement = null;
         try {
             statement = connection.createStatement();
             for (String deleteUserStatement : getDeleteUserStatements(username)){
                 statement.execute(deleteUserStatement);
             }
+            return true;
         } catch (SQLException e) {
             LOG.error("error executing SQL for deleteUser: {}", e);
             Exceptions.propagateIfFatal(e);
+            return false;
         } finally {
             close(statement);
         }
