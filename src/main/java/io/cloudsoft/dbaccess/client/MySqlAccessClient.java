@@ -2,6 +2,8 @@ package io.cloudsoft.dbaccess.client;
 
 import java.util.List;
 
+import org.apache.brooklyn.api.objs.Configurable.ConfigurationSupport;
+
 import com.google.common.collect.ImmutableList;
 
 public class MySqlAccessClient extends AbstractDatabaseAccessClient {
@@ -10,8 +12,12 @@ public class MySqlAccessClient extends AbstractDatabaseAccessClient {
     private static final String GRANT_PERMISSIONS = "GRANT SELECT ON %s.* TO '%s'@'%s';";
     private static final String DROP_USER = "DROP USER '%s'@'%s';";
 
-    public MySqlAccessClient(String endpoint, String adminUsername, String adminPassword, String database) {
-        super(endpoint, adminUsername, adminPassword, database);
+    public MySqlAccessClient(String protocolScheme, String host, String port, 
+            String adminUsername, String adminPassword, String database) {
+        super(protocolScheme, host, port, adminUsername, adminPassword, database);
+    }
+    public MySqlAccessClient(ConfigurationSupport config) {
+        super(config);
     }
 
     @Override

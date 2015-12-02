@@ -1,8 +1,8 @@
 package io.cloudsoft.dbaccess;
 
 import org.apache.brooklyn.api.entity.EntitySpec;
+import org.apache.brooklyn.core.entity.EntityAsserts;
 import org.apache.brooklyn.entity.database.postgresql.PostgreSqlNode;
-import org.apache.brooklyn.test.EntityTestUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -39,8 +39,8 @@ public class PostgresDatabaseAccessEntityIntegrationTest extends AbstractDatabas
                 .configure(DatabaseAccessEntity.USERNAME, TEST_USERNAME)
                 .configure(DatabaseAccessEntity.PASSWORD, TEST_PASSWORD);
         PostgresDatabaseAccessEntity entity = createDatabaseAccessEntity(spec);
-        EntityTestUtils.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.USERNAME, TEST_USERNAME);
-        EntityTestUtils.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.PASSWORD, TEST_PASSWORD);
+        EntityAsserts.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.USERNAME, TEST_USERNAME);
+        EntityAsserts.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.PASSWORD, TEST_PASSWORD);
         runTest(entity);
     }
 

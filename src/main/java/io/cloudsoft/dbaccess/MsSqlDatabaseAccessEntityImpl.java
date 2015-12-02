@@ -7,8 +7,9 @@ public class MsSqlDatabaseAccessEntityImpl extends DatabaseAccessEntityImpl impl
 
     @Override
     public DatabaseAccessClient createClient() {
-        return new MsSqlAccessClient(config().get(ENDPOINT_URL), config().get(ADMIN_USER), config().get(ADMIN_PASSWORD),
-                config().get(DATABASE));
+        return new MsSqlAccessClient(config());
     }
 
+    @Override public String getProtocolScheme() { return "mssql"; }
+    
 }

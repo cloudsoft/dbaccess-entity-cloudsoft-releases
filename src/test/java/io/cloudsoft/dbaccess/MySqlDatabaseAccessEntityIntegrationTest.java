@@ -4,9 +4,9 @@ import java.net.InetAddress;
 import java.net.URL;
 
 import org.apache.brooklyn.api.entity.EntitySpec;
+import org.apache.brooklyn.core.entity.EntityAsserts;
 import org.apache.brooklyn.entity.database.DatastoreMixins;
 import org.apache.brooklyn.entity.database.mysql.MySqlNode;
-import org.apache.brooklyn.test.EntityTestUtils;
 import org.apache.brooklyn.util.core.text.TemplateProcessor;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -57,8 +57,8 @@ public class MySqlDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAc
                 .configure(DatabaseAccessEntity.PASSWORD, TEST_PASSWORD);
         MySqlDatabaseAccessEntity entity = createDatabaseAccessEntity(spec);
         entity.bind();
-        EntityTestUtils.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.USERNAME, TEST_USERNAME);
-        EntityTestUtils.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.PASSWORD, TEST_PASSWORD);
+        EntityAsserts.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.USERNAME, TEST_USERNAME);
+        EntityAsserts.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.PASSWORD, TEST_PASSWORD);
         runTest(entity);
     }
 
