@@ -109,9 +109,13 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
         LOG.info("Connecting to " + jdbcUrl+" to create "+username);
 
         Connection connection = getConnection(jdbcUrl);
-        createUser(connection, username, password);
-        grantPermissions(connection, username, password);
-        close(connection);
+        try {
+            createUser(connection, username, password);
+            if (!grantPermissions(connection, username, password))
+                throw new IllegalStateException("Unable to create user '"+username+"'. Confirm admin credential and see logs for more information.");
+        } finally {
+            close(connection);
+        }
     }
 
     @Override
@@ -145,31 +149,35 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
         }
     }
 
-    private void grantPermissions(Connection connection, String username, String password) {
+    private boolean grantPermissions(Connection connection, String username, String password) {
         Statement statement = null;
         try {
             statement = connection.createStatement();
             for (String grantStatement : getGrantPermissionsStatements(username, password)){
                 statement.execute(grantStatement);
             }
+            return true;
         } catch (SQLException e) {
             LOG.error("error executing SQL for grantPermissions: {}", e);
             Exceptions.propagateIfFatal(e);
+            return false;
         } finally {
             close(statement);
         }
     }
 
-    private void deleteUser(Connection connection, String username) {
+    private boolean deleteUser(Connection connection, String username) {
         Statement statement = null;
         try {
             statement = connection.createStatement();
             for (String deleteUserStatement : getDeleteUserStatements(username)){
                 statement.execute(deleteUserStatement);
             }
+            return true;
         } catch (SQLException e) {
             LOG.error("error executing SQL for deleteUser: {}", e);
             Exceptions.propagateIfFatal(e);
+            return false;
         } finally {
             close(statement);
         }

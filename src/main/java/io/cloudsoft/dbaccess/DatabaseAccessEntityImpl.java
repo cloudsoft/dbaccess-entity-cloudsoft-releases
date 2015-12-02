@@ -8,10 +8,13 @@ import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.apache.brooklyn.api.location.Location;
 import org.apache.brooklyn.config.ConfigKey;
 import org.apache.brooklyn.entity.stock.BasicApplicationImpl;
+import org.apache.brooklyn.util.core.task.DynamicTasks;
+import org.apache.brooklyn.util.core.task.Tasks;
 import org.apache.brooklyn.util.net.Urls;
 import org.apache.brooklyn.util.text.Identifiers;
 import org.apache.brooklyn.util.text.Strings;
@@ -158,35 +161,42 @@ public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl impl
     public void unbind() {
     }
     
-    public void createUser(boolean failIfUserExists) {
-        String existingUser = sensors().get(USERNAME);
-        if (existingUser!=null) {
-            if (failIfUserExists)
-                throw new IllegalStateException("User already defined; cannot create user again");
-            return;
-        } else {
-            String username = config().get(USERNAME);
-            String password = config().get(PASSWORD);
-            if (username == null) {
-                username = ("user_" + Identifiers.makeRandomJavaId(6)).toLowerCase();
+    public void createUser(final boolean failIfUserExists) {
+        // wrap in task so it shows up in UI; returns a status message
+        DynamicTasks.queueIfPossible( Tasks.<String>builder().displayName("create user").body(new Callable<String>() {
+            public String call() {
+                String existingUser = sensors().get(USERNAME);
+                if (existingUser!=null) {
+                    if (failIfUserExists)
+                        throw new IllegalStateException("User already defined; cannot create user again");
+                    return "skipped: already have a user '"+existingUser+"'";
+                } else {
+                    String username = config().get(USERNAME);
+                    String password = config().get(PASSWORD);
+                    if (username == null) {
+                        username = ("user_" + Identifiers.makeRandomJavaId(6)).toLowerCase();
+                    }
+                    if (password == null) {
+                        password = Identifiers.makeRandomJavaId(12);
+                    }
+                    sensors().set(USERNAME, username);
+                    sensors().set(PASSWORD, password);
+
+                    String database = config().get(DATABASE);
+                    DatabaseAccessEntityImpl.this.setDisplayName(String.format("DBAccess (%s): %s", 
+                        Strings.isNonBlank(database) ? database : "no DB", 
+                            username));
+
+                    LOG.info("Creating user");
+                    DatabaseAccessClient client = createClient();
+                    client.createUser(username, password);
+
+                    exportCfSensorsSet(username, password, client.getJdbcUrl(username, password));
+                    
+                    return "created: '"+username+"'";
+                }
             }
-            if (password == null) {
-                password = Identifiers.makeRandomJavaId(12);
-            }
-            sensors().set(USERNAME, username);
-            sensors().set(PASSWORD, password);
-            
-            String database = config().get(DATABASE);
-            this.setDisplayName(String.format("DBAccess (%s): %s", 
-                Strings.isNonBlank(database) ? database : "no DB", 
-                username));
-            
-            LOG.info("Creating user");
-            DatabaseAccessClient client = createClient();
-            client.createUser(username, password);
-            
-            exportCfSensorsSet(username, password, client.getJdbcUrl(username, password));
-        }
+        }).build() ).orSubmitAsync(this).andWaitForSuccess();
     }
 
     @VisibleForTesting
