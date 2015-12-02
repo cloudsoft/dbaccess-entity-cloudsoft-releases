@@ -109,7 +109,7 @@ public class DatabaseAccessEntityConfigAndSensorsTest extends BrooklynMgmtUnitTe
                     "postgres://bob:p4ss@host:1234/dbname",
                     
                     // https://www.petefreitag.com/articles/jdbc_urls/
-                    "jdbc:postgres://host:1234/dbname?user=bob&password=p4ss");
+                    "jdbc:postgresql://host:1234/dbname?user=bob&password=p4ss");
     }
 
     @Test

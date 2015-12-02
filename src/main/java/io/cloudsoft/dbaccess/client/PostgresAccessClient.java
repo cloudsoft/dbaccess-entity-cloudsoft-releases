@@ -43,4 +43,7 @@ public class PostgresAccessClient extends AbstractDatabaseAccessClient {
                 String.format(DROP_USER, username)
         );
     }
+    
+    protected String getJdbcUrlProtocolScheme() { return "jdbc:"+"postgresql"; }
+    
 }
