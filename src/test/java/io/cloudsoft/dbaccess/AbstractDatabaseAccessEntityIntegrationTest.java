@@ -1,6 +1,13 @@
 package io.cloudsoft.dbaccess;
 
-import com.google.common.collect.ImmutableList;
+import io.cloudsoft.cfentity.CloudFoundryService;
+
+import java.net.InetAddress;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.apache.brooklyn.api.entity.Entity;
 import org.apache.brooklyn.api.entity.EntitySpec;
@@ -10,20 +17,13 @@ import org.apache.brooklyn.core.test.BrooklynAppLiveTestSupport;
 import org.apache.brooklyn.entity.database.DatastoreMixins;
 import org.apache.brooklyn.util.exceptions.Exceptions;
 import org.apache.brooklyn.util.text.Strings;
-import org.python.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 
-import io.cloudsoft.cfentity.CloudFoundryService;
-
-import java.net.InetAddress;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 public abstract class AbstractDatabaseAccessEntityIntegrationTest extends BrooklynAppLiveTestSupport {
     protected static final String TEST_DATABASE = "testdatabase";
