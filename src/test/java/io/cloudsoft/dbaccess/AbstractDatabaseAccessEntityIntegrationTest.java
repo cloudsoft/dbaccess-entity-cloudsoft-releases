@@ -1,6 +1,5 @@
 package io.cloudsoft.dbaccess;
 
-import io.cloudsoft.cfentity.CloudFoundryService;
 
 import java.net.InetAddress;
 import java.sql.Connection;
@@ -15,7 +14,6 @@ import org.apache.brooklyn.api.location.Location;
 import org.apache.brooklyn.core.sensor.DependentConfiguration;
 import org.apache.brooklyn.core.test.BrooklynAppLiveTestSupport;
 import org.apache.brooklyn.entity.database.DatastoreMixins;
-import org.apache.brooklyn.util.exceptions.Exceptions;
 import org.apache.brooklyn.util.text.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +21,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 
 public abstract class AbstractDatabaseAccessEntityIntegrationTest extends BrooklynAppLiveTestSupport {
     protected static final String TEST_DATABASE = "testdatabase";
@@ -94,11 +91,6 @@ public abstract class AbstractDatabaseAccessEntityIntegrationTest extends Brookl
         spec.configure(DatabaseAccessEntity.ADMIN_PASSWORD, TEST_ADMIN_PASSWORD);
         spec.configure(DatabaseAccessEntity.ENDPOINT_URL, DependentConfiguration.attributeWhenReady(databaseNode, DatastoreMixins.DATASTORE_URL));
         T entity = app.createAndManageChild(spec);
-        try {
-            entity.invoke(CloudFoundryService.BIND, ImmutableMap.<String, Object>of()).get();
-        } catch (Exception e) {
-            Exceptions.propagateIfFatal(e);
-        }
         return entity;
     }
 

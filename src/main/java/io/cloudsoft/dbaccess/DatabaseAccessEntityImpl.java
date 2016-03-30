@@ -153,14 +153,6 @@ public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl impl
         super.stop();
     }
     
-    @Override
-    public void bind() {
-    }
-    
-    @Override
-    public void unbind() {
-    }
-    
     public void createUser(final boolean failIfUserExists) {
         // wrap in task so it shows up in UI; returns a status message
         DynamicTasks.queueIfPossible( Tasks.<String>builder().displayName("create user").body(new Callable<String>() {

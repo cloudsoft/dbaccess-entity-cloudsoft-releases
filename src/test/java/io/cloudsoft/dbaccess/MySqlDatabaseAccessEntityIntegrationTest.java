@@ -56,7 +56,6 @@ public class MySqlDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAc
                 .configure(DatabaseAccessEntity.USERNAME, TEST_USERNAME)
                 .configure(DatabaseAccessEntity.PASSWORD, TEST_PASSWORD);
         MySqlDatabaseAccessEntity entity = createDatabaseAccessEntity(spec);
-        entity.bind();
         EntityAsserts.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.USERNAME, TEST_USERNAME);
         EntityAsserts.assertAttributeEqualsEventually(entity, DatabaseAccessEntity.PASSWORD, TEST_PASSWORD);
         runTest(entity);

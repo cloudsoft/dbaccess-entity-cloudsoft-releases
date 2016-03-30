@@ -1,6 +1,5 @@
 package io.cloudsoft.dbaccess;
 
-import io.cloudsoft.cfentity.CloudFoundryService;
 import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 
 import org.apache.brooklyn.api.sensor.AttributeSensor;
@@ -11,7 +10,7 @@ import org.apache.brooklyn.core.sensor.Sensors;
 import org.apache.brooklyn.entity.database.DatastoreMixins;
 import org.apache.brooklyn.entity.stock.BasicApplication;
 
-public interface DatabaseAccessEntity extends BasicApplication, DatastoreMixins.HasDatastoreUrl, CloudFoundryService {
+public interface DatabaseAccessEntity extends BasicApplication, DatastoreMixins.HasDatastoreUrl {
 
     ConfigKey<String> ENDPOINT_URL = ConfigKeys.newStringConfigKey("dbaccess.endpoint.url",
             "Connection string to the database in which the user should be created");
