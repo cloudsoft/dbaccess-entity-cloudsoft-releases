@@ -76,10 +76,9 @@
         </dependency>
 
         <dependency>
-            <groupId>postgresql</groupId>
+            <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>9.1-901.jdbc4</version>
-            <scope>test</scope>
+            <version>9.4-1206-jdbc41</version>
         </dependency>
 
         <dependency>
