@@ -1,15 +1,7 @@
 dbaccess
 ===
 
-Pre-requisites:
-
- * `cf-entity` built and installed in your Maven repository:
-   https://github.com/brooklyncentral/cf-entity
- 
- * MS SQL Server JDBC jar downloaded and installed in your Maven repository: 
-   http://stackoverflow.com/questions/19537396/missing-artifact-com-microsoft-sqlserversqljdbc4jar4-0
- 
-Then, to build an assembly, run:
+To build an assembly, run:
 
     mvn clean assembly:assembly
 
