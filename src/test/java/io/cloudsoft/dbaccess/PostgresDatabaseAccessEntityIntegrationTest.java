@@ -26,14 +26,14 @@ public class PostgresDatabaseAccessEntityIntegrationTest extends AbstractDatabas
         super.tearDown();
     }
 
-    @Test()
+    @Test(groups="Integration")
     public void testNoPasswordProvided() throws Exception {
         EntitySpec<PostgresDatabaseAccessEntity> spec = EntitySpec.create(PostgresDatabaseAccessEntity.class);
         PostgresDatabaseAccessEntity entity = createDatabaseAccessEntity(spec);
         runTest(entity);
     }
 
-    @Test()
+    @Test(groups="Integration")
     public void testWithPasswordProvided() throws Exception  {
         EntitySpec<PostgresDatabaseAccessEntity> spec = EntitySpec.create(PostgresDatabaseAccessEntity.class)
                 .configure(DatabaseAccessEntity.USERNAME, TEST_USERNAME)
