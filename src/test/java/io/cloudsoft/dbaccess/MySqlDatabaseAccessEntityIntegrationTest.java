@@ -43,14 +43,14 @@ public class MySqlDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAc
         super.tearDown();
     }
 
-    @Test()
+    @Test(groups="Integration")
     public void testNoPasswordProvided() throws Exception {
         EntitySpec<MySqlDatabaseAccessEntity> spec = EntitySpec.create(MySqlDatabaseAccessEntity.class);
         MySqlDatabaseAccessEntity entity = createDatabaseAccessEntity(spec);
         runTest(entity);
     }
 
-    @Test()
+    @Test(groups="Integration")
     public void testWithPasswordProvided() throws Exception {
         EntitySpec<MySqlDatabaseAccessEntity> spec = EntitySpec.create(MySqlDatabaseAccessEntity.class)
                 .configure(DatabaseAccessEntity.USERNAME, TEST_USERNAME)
