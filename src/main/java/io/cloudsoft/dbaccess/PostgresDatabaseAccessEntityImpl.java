@@ -10,6 +10,6 @@ public class PostgresDatabaseAccessEntityImpl extends DatabaseAccessEntityImpl i
         return new PostgresAccessClient(config());
     }
 
-    @Override public String getProtocolScheme() { return "postgresql"; }
+    @Override public String getProtocolScheme() { return "postgres"; }
 
 }
