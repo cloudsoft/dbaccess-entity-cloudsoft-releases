@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClient {
 
@@ -27,17 +29,19 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
     private final String adminPassword;
     private final String adminUsername;
     private final String database;
+    private List<String> permissions;
 
     private static final Logger LOG = LoggerFactory.getLogger(PostgresAccessClient.class);
 
     public AbstractDatabaseAccessClient(String protocolScheme, String host, String port, 
-            String adminUsername, String adminPassword, @Nullable String database) {
+            String adminUsername, String adminPassword, @Nullable String database, @Nullable List<String> permissions) {
         this.protocolScheme = Preconditions.checkNotNull(protocolScheme, "protocol scheme");
         this.host = Preconditions.checkNotNull(host, "host");
         this.port = Preconditions.checkNotNull(port, "port");
         this.adminUsername = Preconditions.checkNotNull(adminUsername, "admin username");
         this.adminPassword = Preconditions.checkNotNull(adminPassword, "admin password");
         this.database = database;
+        this.permissions = permissions;
     }
 
     public AbstractDatabaseAccessClient(ConfigurationSupport config) {
@@ -47,7 +51,9 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
             config.get(DatabaseAccessEntity.PORT), 
             config.get(DatabaseAccessEntity.ADMIN_USER), 
             config.get(DatabaseAccessEntity.ADMIN_PASSWORD), 
-            config.get(DatabaseAccessEntity.DATABASE) ); 
+            config.get(DatabaseAccessEntity.DATABASE),
+            config.get(DatabaseAccessEntity.PERMISSIONS)
+        );
     }
 
     protected String getProtocolScheme() {
@@ -205,7 +211,32 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
 
     protected abstract List<String> getCreateUserStatements(String username, String password);
 
-    protected abstract List<String> getGrantPermissionsStatements(String username, String password);
+    protected List<String> getGrantPermissionsStatements(String username, String password) {
+        List<String> permissionStatements = Lists.newArrayList();
+        // at a minimum should have SELECT permission
+        permissionStatements.addAll(getGrantSelectPermissionStatements(username));
+        if (permissions == null) return permissionStatements;
+
+        for (String permission : permissions) {
+            switch (permission.toUpperCase()) {
+                case "DELETE":
+                    permissionStatements.addAll(getGrantDeletePermissionStatements(username));
+                    break;
+                case "INSERT":
+                    permissionStatements.addAll(getGrantInsertPermissionStatements(username));
+                    break;
+                case "UPDATE":
+                    permissionStatements.addAll(getGrantUpdatePermissionStatements(username));
+                    break;
+            }
+        }
+        return permissionStatements;
+    }
+
+    protected abstract Collection<String> getGrantSelectPermissionStatements(String username);
+    protected abstract Collection<String> getGrantDeletePermissionStatements(String username);
+    protected abstract Collection<String> getGrantInsertPermissionStatements(String username);
+    protected abstract Collection<String> getGrantUpdatePermissionStatements(String username);
 
     protected abstract List<String> getDeleteUserStatements(String username);
 
