@@ -1,5 +1,7 @@
 package io.cloudsoft.dbaccess;
 
+import java.util.List;
+
 import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 
 import org.apache.brooklyn.api.sensor.AttributeSensor;
@@ -9,6 +11,8 @@ import org.apache.brooklyn.core.sensor.BasicAttributeSensorAndConfigKey;
 import org.apache.brooklyn.core.sensor.Sensors;
 import org.apache.brooklyn.entity.database.DatastoreMixins;
 import org.apache.brooklyn.entity.stock.BasicApplication;
+
+import com.google.common.reflect.TypeToken;
 
 public interface DatabaseAccessEntity extends BasicApplication, DatastoreMixins.HasDatastoreUrl {
 
@@ -32,6 +36,9 @@ public interface DatabaseAccessEntity extends BasicApplication, DatastoreMixins.
 
     ConfigKey<String> DATABASE = ConfigKeys.newStringConfigKey("dbaccess.database",
             "Database in which the user should be created");
+
+    ConfigKey<List<String>> PERMISSIONS = ConfigKeys.newConfigKey(new TypeToken<List<String>>() { }, "dbaccess.permissions",
+            "Permissions to grant to the new user");
 
     BasicAttributeSensorAndConfigKey<String> USERNAME = new BasicAttributeSensorAndConfigKey<>(
             String.class, "dbaccess.username", "Displays the username which has been created");

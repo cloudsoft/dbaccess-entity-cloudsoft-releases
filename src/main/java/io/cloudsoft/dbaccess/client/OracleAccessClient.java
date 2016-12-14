@@ -1,5 +1,6 @@
 package io.cloudsoft.dbaccess.client;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.brooklyn.api.objs.Configurable.ConfigurationSupport;
@@ -13,7 +14,11 @@ public class OracleAccessClient extends AbstractDatabaseAccessClient {
     
     
     private static final String CREATE_USER = "CREATE USER %s IDENTIFIED BY %s";
-    private static final String GRANT_PERMISSIONS = "GRANT create session, select any table, select any dictionary TO %s";
+    private static final String GRANT_CREATE_SESSION = "GRANT CREATE SESSION TO %s";
+    private static final String GRANT_SELECT_PERMISSIONS = "GRANT SELECT ANY TABLE, SELECT ANY DICTIONARY TO %s";
+    private static final String GRANT_DELETE_PERMISSIONS = "GRANT DELETE ANY TABLE TO %s";
+    private static final String GRANT_INSERT_PERMISSIONS = "GRANT INSERT ANY TABLE TO %s";
+    private static final String GRANT_UPDATE_PERMISSIONS = "GRANT UPDATE ANY TABLE TO %s";
     private static final String KILL_SESSIONS =
             "BEGIN\n" +
             "   FOR conn IN (SELECT sid, serial# FROM v$session WHERE username = UPPER('%s')) LOOP\n" +
@@ -23,8 +28,8 @@ public class OracleAccessClient extends AbstractDatabaseAccessClient {
     private static final String DROP_USER = "DROP USER %s";
 
     public OracleAccessClient(String protocolScheme, String host, String port, 
-            String adminUsername, String adminPassword, String database) {
-        super(protocolScheme, host, port, adminUsername, adminPassword, database);
+            String adminUsername, String adminPassword, String database, List<String> permissions) {
+        super(protocolScheme, host, port, adminUsername, adminPassword, database, permissions);
     }
     public OracleAccessClient(ConfigurationSupport config) {
         super(config);
@@ -36,8 +41,26 @@ public class OracleAccessClient extends AbstractDatabaseAccessClient {
     }
 
     @Override
-    protected List<String> getGrantPermissionsStatements(String username, String password) {
-        return ImmutableList.of(String.format(GRANT_PERMISSIONS, username));
+    protected Collection<String> getGrantSelectPermissionStatements(String username) {
+        return ImmutableList.of(
+                String.format(GRANT_CREATE_SESSION, username),
+                String.format(GRANT_SELECT_PERMISSIONS, username)
+        );
+    }
+
+    @Override
+    protected Collection<String> getGrantDeletePermissionStatements(String username) {
+        return ImmutableList.of(String.format(GRANT_DELETE_PERMISSIONS, username));
+    }
+
+    @Override
+    protected Collection<String> getGrantInsertPermissionStatements(String username) {
+        return ImmutableList.of(String.format(GRANT_INSERT_PERMISSIONS, username));
+    }
+
+    @Override
+    protected Collection<String> getGrantUpdatePermissionStatements(String username) {
+        return ImmutableList.of(String.format(GRANT_UPDATE_PERMISSIONS, username));
     }
 
     @Override
