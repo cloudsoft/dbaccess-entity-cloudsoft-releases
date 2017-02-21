@@ -2,8 +2,6 @@ package io.cloudsoft.dbaccess;
 
 import java.util.List;
 
-import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
-
 import org.apache.brooklyn.api.sensor.AttributeSensor;
 import org.apache.brooklyn.config.ConfigKey;
 import org.apache.brooklyn.core.config.ConfigKeys;
@@ -12,7 +10,10 @@ import org.apache.brooklyn.core.sensor.Sensors;
 import org.apache.brooklyn.entity.database.DatastoreMixins;
 import org.apache.brooklyn.entity.stock.BasicApplication;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.reflect.TypeToken;
+
+import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 
 public interface DatabaseAccessEntity extends BasicApplication, DatastoreMixins.HasDatastoreUrl {
 
@@ -37,8 +38,23 @@ public interface DatabaseAccessEntity extends BasicApplication, DatastoreMixins.
     ConfigKey<String> DATABASE = ConfigKeys.newStringConfigKey("dbaccess.database",
             "Database in which the user should be created");
 
-    ConfigKey<List<String>> PERMISSIONS = ConfigKeys.newConfigKey(new TypeToken<List<String>>() { }, "dbaccess.permissions",
-            "Permissions to grant to the new user");
+    ConfigKey<AccessModes> ACCESS_MODE = ConfigKeys.newConfigKey(AccessModes.class, "dbaccess.access.mode",
+            "What access should be granted: read-only, read-write, or custom");
+
+    public enum AccessModes { READ_ONLY, READ_WRITE, CUSTOM;
+        @Override
+        public String toString() {
+            return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_HYPHEN, super.toString());
+        }
+    }
+    public enum Permissions { INSERT, UPDATE, DELETE }
+    
+    ConfigKey<String> ACCESS_SCRIPT = ConfigKeys.newStringConfigKey("dbaccess.access.script",
+            "Script that should be run to give access, optionally accessing `${user}` and `${pass}`");
+
+    @SuppressWarnings("serial")
+    ConfigKey<List<Permissions>> PERMISSIONS = ConfigKeys.newConfigKey(new TypeToken<List<Permissions>>() { }, "dbaccess.permissions",
+            "Permissions to grant to the new user, of the form `INSERT`, `UPDATE`, or `DELETE`.");
 
     BasicAttributeSensorAndConfigKey<String> USERNAME = new BasicAttributeSensorAndConfigKey<>(
             String.class, "dbaccess.username", "Displays the username which has been created");
