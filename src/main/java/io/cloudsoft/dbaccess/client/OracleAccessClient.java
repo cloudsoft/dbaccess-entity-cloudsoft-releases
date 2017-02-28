@@ -44,7 +44,7 @@ public class OracleAccessClient extends AbstractDatabaseAccessClient {
                     +" TO ${user}");
             }
             
-            protected List<String> getGrantPermissionStatements(String permission) {
+            protected List<String> getGrantPermissionStatementsDefault(String permission) {
                 return MutableList.of("GRANT "+permission+" ANY TABLE"
                     +" TO ${user}");
             }

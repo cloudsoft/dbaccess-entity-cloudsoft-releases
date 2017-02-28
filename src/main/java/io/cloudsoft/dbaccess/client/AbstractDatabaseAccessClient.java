@@ -25,7 +25,7 @@ import com.google.common.collect.Lists;
 
 import io.cloudsoft.dbaccess.DatabaseAccessEntity;
 import io.cloudsoft.dbaccess.DatabaseAccessEntity.AccessModes;
-import io.cloudsoft.dbaccess.DatabaseAccessEntity.Permissions;
+import io.cloudsoft.dbaccess.DatabaseAccessEntity.Permission;
 
 public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClient {
 
@@ -37,7 +37,7 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
     private final String database;
     private final AccessModes accessMode;
     private final String accessScript;
-    private final List<Permissions> permissions;
+    private final List<Permission> permissions;
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDatabaseAccessClient.class);
 
@@ -46,7 +46,7 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
             @Nullable String database, 
             @Nullable AccessModes accessMode, 
             @Nullable String accessScript, 
-            @Nullable List<Permissions> permissions) {
+            @Nullable List<Permission> permissions) {
         this.protocolScheme = Preconditions.checkNotNull(protocolScheme, "protocol scheme");
         this.host = Preconditions.checkNotNull(host, "host");
         this.port = Preconditions.checkNotNull(port, "port");
@@ -68,11 +68,11 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
             null, toPermList(permissions));
     }
     
-    private static List<Permissions> toPermList(List<?> permissions) {
-        List<Permissions> result = MutableList.of();
+    private static List<Permission> toPermList(List<?> permissions) {
+        List<Permission> result = MutableList.of();
         if (permissions==null) return result;
         for (Object p: permissions) {
-            result.add(TypeCoercions.coerce(p, Permissions.class));
+            result.add(TypeCoercions.coerce(p, Permission.class));
         }
         return result;
     }
@@ -290,7 +290,7 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
                 return permissionStatements;
             }
     
-            for (Permissions permission : permissions) {
+            for (Permission permission : permissions) {
                 switch (permission) {
                     case DELETE:
                         permissionStatements.addAll(getGrantDeletePermissionStatements());
@@ -307,24 +307,24 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
         }
     
         protected List<String> getGrantSelectPermissionStatements() {
-            return getGrantPermissionStatements("SELECT");
+            return getGrantPermissionStatementsDefault("SELECT");
         }
 
         protected List<String> getGrantDeletePermissionStatements() {
-            return getGrantPermissionStatements("DELETE");
+            return getGrantPermissionStatementsDefault("DELETE");
         }
 
         protected List<String> getGrantInsertPermissionStatements() {
-            return getGrantPermissionStatements("INSERT");
+            return getGrantPermissionStatementsDefault("INSERT");
         }
 
         protected List<String> getGrantUpdatePermissionStatements() {
-            return getGrantPermissionStatements("UPDATE");
+            return getGrantPermissionStatementsDefault("UPDATE");
         }
     
         protected abstract List<String> getCreateUserStatements();
 
-        protected abstract List<String> getGrantPermissionStatements(String permission);
+        protected abstract List<String> getGrantPermissionStatementsDefault(String permission);
 
         protected abstract List<String> getDeleteUserStatements();
     }

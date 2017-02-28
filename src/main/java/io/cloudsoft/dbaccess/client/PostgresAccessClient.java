@@ -32,7 +32,7 @@ public class PostgresAccessClient extends AbstractDatabaseAccessClient {
                 return MutableList.of("CREATE USER ${user} WITH ENCRYPTED PASSWORD '${pass}'");
             }
 
-            protected List<String> getGrantPermissionStatements(String permission) {
+            protected List<String> getGrantPermissionStatementsDefault(String permission) {
                 return MutableList.of("GRANT "+permission+" ON ALL TABLES IN SCHEMA public"
                     +" TO ${user};");
             }

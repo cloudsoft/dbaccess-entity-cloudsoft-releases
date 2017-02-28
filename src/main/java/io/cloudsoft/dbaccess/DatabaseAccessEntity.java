@@ -39,7 +39,8 @@ public interface DatabaseAccessEntity extends BasicApplication, DatastoreMixins.
             "Database in which the user should be created");
 
     ConfigKey<AccessModes> ACCESS_MODE = ConfigKeys.newConfigKey(AccessModes.class, "dbaccess.access.mode",
-            "What access should be granted: read-only, read-write, or custom");
+            "What access should be granted: read-only, read-write, or custom; in RW mode permissions should be supplied,"
+            + " and in custom a script should be supplied");
 
     public enum AccessModes { READ_ONLY, READ_WRITE, CUSTOM;
         @Override
@@ -47,14 +48,14 @@ public interface DatabaseAccessEntity extends BasicApplication, DatastoreMixins.
             return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_HYPHEN, super.toString());
         }
     }
-    public enum Permissions { INSERT, UPDATE, DELETE }
+    public enum Permission { INSERT, UPDATE, DELETE }
     
     ConfigKey<String> ACCESS_SCRIPT = ConfigKeys.newStringConfigKey("dbaccess.access.script",
-            "Script that should be run to give access, optionally accessing `${user}` and `${pass}`");
+            "Script that should be run to give access, when access mode is custom; optionally can access `${user}` and `${pass}` and `${db}`");
 
     @SuppressWarnings("serial")
-    ConfigKey<List<Permissions>> PERMISSIONS = ConfigKeys.newConfigKey(new TypeToken<List<Permissions>>() { }, "dbaccess.permissions",
-            "Permissions to grant to the new user, of the form `INSERT`, `UPDATE`, or `DELETE`.");
+    ConfigKey<List<Permission>> PERMISSIONS = ConfigKeys.newConfigKey(new TypeToken<List<Permission>>() { }, "dbaccess.permissions",
+            "Permissions to grant to the new user, in addition to default SELECT in READ_WRITE mode, of the form `INSERT`, `UPDATE`, or `DELETE`.");
 
     BasicAttributeSensorAndConfigKey<String> USERNAME = new BasicAttributeSensorAndConfigKey<>(
             String.class, "dbaccess.username", "Displays the username which has been created");

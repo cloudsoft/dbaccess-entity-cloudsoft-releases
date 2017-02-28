@@ -7,7 +7,7 @@ import org.apache.brooklyn.util.collections.MutableList;
 import org.apache.brooklyn.util.text.Strings;
 
 import io.cloudsoft.dbaccess.DatabaseAccessEntity.AccessModes;
-import io.cloudsoft.dbaccess.DatabaseAccessEntity.Permissions;
+import io.cloudsoft.dbaccess.DatabaseAccessEntity.Permission;
 
 public class MySqlAccessClient extends AbstractDatabaseAccessClient {
     
@@ -16,7 +16,7 @@ public class MySqlAccessClient extends AbstractDatabaseAccessClient {
     }
     
     public MySqlAccessClient(String protocolScheme, String host, String port, String adminUsername, String adminPassword,
-            String database, AccessModes accessMode, String accessScript, List<Permissions> permissions) {
+            String database, AccessModes accessMode, String accessScript, List<Permission> permissions) {
         super(protocolScheme, host, port, adminUsername, adminPassword, database, accessMode, accessScript, permissions);
     }
 
@@ -45,7 +45,7 @@ public class MySqlAccessClient extends AbstractDatabaseAccessClient {
                 return expandHosts("CREATE USER '${user}'@'__HOST__' IDENTIFIED BY '${pass}'");
             }
 
-            protected List<String> getGrantPermissionStatements(String permission) {
+            protected List<String> getGrantPermissionStatementsDefault(String permission) {
                 return expandHosts("GRANT "+permission+" ON ${db}.* TO '${user}'@'__HOST__';");
             }
             

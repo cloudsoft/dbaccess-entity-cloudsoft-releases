@@ -61,7 +61,7 @@ public class MsSqlAccessClient extends AbstractDatabaseAccessClient {
             }
             
             @Override
-            protected List<String> getGrantPermissionStatements(String permission) {
+            protected List<String> getGrantPermissionStatementsDefault(String permission) {
                 return MutableList.of("GRANT "+permission+" TO ${user}");
             }
         

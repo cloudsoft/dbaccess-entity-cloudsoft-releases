@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 
 import io.cloudsoft.dbaccess.DatabaseAccessEntity.AccessModes;
-import io.cloudsoft.dbaccess.DatabaseAccessEntity.Permissions;
+import io.cloudsoft.dbaccess.DatabaseAccessEntity.Permission;
 import io.cloudsoft.dbaccess.client.MySqlAccessClient;
 
 public class MySqlDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAccessEntityIntegrationTest {
@@ -102,7 +102,7 @@ public class MySqlDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAc
             "GRANT SELECT ON ${db}.${db}_${user} TO '${user}'@'%';");
 
         MySqlAccessClient access = new MySqlAccessClient("mysql", "127.0.0.1", "3306", "root", "123456", "customers", 
-            AccessModes.CUSTOM, script, MutableList.<Permissions>of());
+            AccessModes.CUSTOM, script, MutableList.<Permission>of());
         try {
             access.createUser("sample_test_user", "pwd");
         } catch (Exception e) {
