@@ -2,8 +2,6 @@ package io.cloudsoft.dbaccess;
 
 import java.util.List;
 
-import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
-
 import org.apache.brooklyn.api.sensor.AttributeSensor;
 import org.apache.brooklyn.config.ConfigKey;
 import org.apache.brooklyn.core.config.ConfigKeys;
@@ -12,7 +10,10 @@ import org.apache.brooklyn.core.sensor.Sensors;
 import org.apache.brooklyn.entity.database.DatastoreMixins;
 import org.apache.brooklyn.entity.stock.BasicApplication;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.reflect.TypeToken;
+
+import io.cloudsoft.dbaccess.client.DatabaseAccessClient;
 
 public interface DatabaseAccessEntity extends BasicApplication, DatastoreMixins.HasDatastoreUrl {
 
@@ -37,8 +38,24 @@ public interface DatabaseAccessEntity extends BasicApplication, DatastoreMixins.
     ConfigKey<String> DATABASE = ConfigKeys.newStringConfigKey("dbaccess.database",
             "Database in which the user should be created");
 
-    ConfigKey<List<String>> PERMISSIONS = ConfigKeys.newConfigKey(new TypeToken<List<String>>() { }, "dbaccess.permissions",
-            "Permissions to grant to the new user");
+    ConfigKey<AccessModes> ACCESS_MODE = ConfigKeys.newConfigKey(AccessModes.class, "dbaccess.access.mode",
+            "What access should be granted: read-only, read-write, or custom; in RW mode permissions should be supplied,"
+            + " and in custom a script should be supplied");
+
+    public enum AccessModes { READ_ONLY, READ_WRITE, CUSTOM;
+        @Override
+        public String toString() {
+            return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_HYPHEN, super.toString());
+        }
+    }
+    public enum Permission { INSERT, UPDATE, DELETE }
+    
+    ConfigKey<String> ACCESS_SCRIPT = ConfigKeys.newStringConfigKey("dbaccess.access.script",
+            "Script that should be run to give access, when access mode is custom; optionally can access `${user}` and `${pass}` and `${db}`");
+
+    @SuppressWarnings("serial")
+    ConfigKey<List<Permission>> PERMISSIONS = ConfigKeys.newConfigKey(new TypeToken<List<Permission>>() { }, "dbaccess.permissions",
+            "Permissions to grant to the new user, in addition to default SELECT in READ_WRITE mode, of the form `INSERT`, `UPDATE`, or `DELETE`.");
 
     BasicAttributeSensorAndConfigKey<String> USERNAME = new BasicAttributeSensorAndConfigKey<>(
             String.class, "dbaccess.username", "Displays the username which has been created");

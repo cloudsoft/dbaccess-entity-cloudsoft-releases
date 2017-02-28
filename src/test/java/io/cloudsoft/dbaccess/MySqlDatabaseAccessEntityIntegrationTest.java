@@ -7,7 +7,11 @@ import org.apache.brooklyn.api.entity.EntitySpec;
 import org.apache.brooklyn.core.entity.EntityAsserts;
 import org.apache.brooklyn.entity.database.DatastoreMixins;
 import org.apache.brooklyn.entity.database.mysql.MySqlNode;
+import org.apache.brooklyn.util.collections.MutableList;
 import org.apache.brooklyn.util.core.text.TemplateProcessor;
+import org.apache.brooklyn.util.text.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -16,8 +20,14 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 
+import io.cloudsoft.dbaccess.DatabaseAccessEntity.AccessModes;
+import io.cloudsoft.dbaccess.DatabaseAccessEntity.Permission;
+import io.cloudsoft.dbaccess.client.MySqlAccessClient;
+
 public class MySqlDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAccessEntityIntegrationTest {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MySqlDatabaseAccessEntityIntegrationTest.class);
+    
     @BeforeMethod(alwaysRun = true)
     @Override
     public void setUp() throws Exception {
@@ -81,4 +91,32 @@ public class MySqlDatabaseAccessEntityIntegrationTest extends AbstractDatabaseAc
         return "mysqladmin";
     }
 
+    // expects a local MySQL on 3306
+    @Test(groups="Live")
+    public void testLocalDatabase() {
+        String script = Strings.lines(
+            "/* This is a comment */",
+            "-- another comment",
+            "CREATE TABLE /* ignored */ ${db}_${user} (id INT NOT NULL);",
+            "GRANT SELECT ON ${db}.${db}_${user} TO '${user}'@'localhost';",
+            "GRANT SELECT ON ${db}.${db}_${user} TO '${user}'@'%';");
+
+        MySqlAccessClient access = new MySqlAccessClient("mysql", "127.0.0.1", "3306", "root", "123456", "customers", 
+            AccessModes.CUSTOM, script, MutableList.<Permission>of());
+        try {
+            access.createUser("sample_test_user", "pwd");
+        } catch (Exception e) {
+            LOG.warn("Deleting user specially after failure", e);
+            access.deleteUser("sample_test_user");
+            throw e;
+        }
+        access.deleteUser("sample_test_user");
+        access.execute("DROP TABLE ${db}_${user}", "sample_test_user", null);
+    }
+
+    public static void main(String[] args) {
+        LOG.info("Running simple local MySQL test");
+        new MySqlDatabaseAccessEntityIntegrationTest().testLocalDatabase();
+    }
+    
 }

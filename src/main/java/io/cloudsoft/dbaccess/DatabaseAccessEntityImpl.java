@@ -175,12 +175,15 @@ public abstract class DatabaseAccessEntityImpl extends BasicApplicationImpl impl
                     sensors().set(PASSWORD, password);
 
                     String database = config().get(DATABASE);
-                    DatabaseAccessEntityImpl.this.setDisplayName(String.format("DBAccess (%s): %s", 
+                    DatabaseAccessEntityImpl.this.setDisplayName(String.format("DBAccess (%s%s - %s): %s",
+                        Strings.isNonBlank(config().get(DEFAULT_DISPLAY_NAME)) ?
+                            config().get(DEFAULT_DISPLAY_NAME)+" - " : "",
                         Strings.isNonBlank(database) ? database : "no DB", 
-                            username));
+                        config().get(ACCESS_MODE),
+                        username));
 
-                    LOG.info("Creating user");
                     DatabaseAccessClient client = createClient();
+                    LOG.info("Creating user for "+DatabaseAccessEntityImpl.this.getDisplayName()+" (at "+client.getAdminJdbcUrlForInfo()+")");
                     client.createUser(username, password);
 
                     exportCfSensorsSet(username, password, client.getJdbcUrl(username, password));
