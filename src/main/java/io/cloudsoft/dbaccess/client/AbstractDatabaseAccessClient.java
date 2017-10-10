@@ -249,7 +249,7 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
                     }
                 }
             } catch (SQLException e) {
-                throw Exceptions.propagate("Error executing SQL for "+description, e);
+                throw Exceptions.propagateAnnotated("Error executing SQL for "+description, e);
             }            
         }
         
@@ -335,7 +335,7 @@ public abstract class AbstractDatabaseAccessClient implements DatabaseAccessClie
         try {
             return DriverManager.getConnection(jdbcUrl);
         } catch (SQLException e) {
-            throw Exceptions.propagate(e);
+            throw Exceptions.propagate((Throwable) e);
         }
     }
 }
