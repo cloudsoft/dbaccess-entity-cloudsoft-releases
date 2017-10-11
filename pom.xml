@@ -239,7 +239,6 @@
                 </plugins>
             </build>
         </profile>
-     <profiles>
         <profile>
           <id>cloudsoft-release</id>
           <activation> <property><name>brooklyn.deployTo</name><value>cloudsoftArtifactory</value></property> </activation>
@@ -256,6 +255,5 @@
               </snapshotRepository>
           </distributionManagement>
         </profile>
-    </profiles>
     </profiles>
 </project>
