@@ -7,12 +7,12 @@
     <parent>
         <groupId>org.apache.brooklyn</groupId>
         <artifactId>brooklyn-downstream-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version> <!-- BROOKLYN_VERSION -->
+        <version>1.0.0-20171031.1559</version> <!-- BROOKLYN_VERSION -->
     </parent>
 
     <groupId>io.cloudsoft.dbaccess</groupId>
     <artifactId>dbaccess</artifactId>
-    <version>0.2.0-SNAPSHOT</version> <!-- DBACCESS_VERSION -->
+    <version>0.2.0-20171031.1559</version> <!-- DBACCESS_VERSION -->
     <packaging>jar</packaging>
 
     <name>DBAccess</name>
